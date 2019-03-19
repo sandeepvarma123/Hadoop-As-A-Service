@@ -1,0 +1,24 @@
+{
+  "name": "haas",
+  "version": "1.0.0",
+  "description": "This package contains web Interface to run Hadoop and  interact with Cloud environment created using openstack",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Hadoop",
+    "cloud",
+    "Hadoop",
+    "As",
+    "A",
+    "Service",
+    "Openstack",
+    "SaaS"
+  ],
+  "author": "Sandeep Varma",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
