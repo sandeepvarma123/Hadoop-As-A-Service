@@ -2,9 +2,10 @@
   "name": "haas",
   "version": "1.0.0",
   "description": "This package contains web Interface to run Hadoop and  interact with Cloud environment created using openstack",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js" 
   },
   "keywords": [
     "Hadoop",
@@ -19,6 +20,24 @@
   "author": "Sandeep Varma",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
-  }
+    "bcryptjs": "^2.4.3",
+    "connect-flash": "^0.1.1",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "mongoose": "^5.4.19",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandeepvarma123/Hadoop-As-A-Service.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sandeepvarma123/Hadoop-As-A-Service/issues"
+  },
+  "homepage": "https://github.com/sandeepvarma123/Hadoop-As-A-Service#readme"
 }

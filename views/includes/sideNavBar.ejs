@@ -9,18 +9,25 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             </button>
-            <h1><a class="navbar-brand" href="index.html"><span class="fa fa-area-chart"></span> HaaS<span class="dashboard_text">Cloud Computing</span></a></h1>
+            <h1><a class="navbar-brand" href="index"><span class="fa fa-area-chart"></span> HaaS<span class="dashboard_text">Cloud Computing</span></a></h1>
           </div>
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="sidebar-menu">
               <li class="header">MAIN NAVIGATION</li>
+              <%if (isAdmin) { %>
+                <li class="treeview">
+                    <a href="AdminPage">
+                    <i class="fa fa-dashboard"></i> <span>Admin Panel</span>
+                    </a>
+                </li>
+              <% } %>
               <li class="treeview">
-                <a href="index.html">
+                <a href="index">
                 <i class="fa fa-dashboard"></i> <span>Home</span>
                 </a>
               </li>
               <li class="treeview">
-                <a href="jobHistory.html">
+                <a href="jobHistory">
                 <i class="fa fa-dashboard"></i> <span>Job History</span>
                 </a>
               </li>
@@ -31,9 +38,9 @@
                 <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                  <li><a href="java.html"><i class="fa fa-angle-right"></i> Java</a></li>
-                  <li><a href="mapReduce.html"><i class="fa fa-angle-right"></i> Map Reduce</a></li>
-                  <li><a href="pig.html"><i class="fa fa-angle-right"></i> Pig</a></li>
+                  <li><a href="java"><i class="fa fa-angle-right"></i> Java</a></li>
+                  <li><a href="mapReduce"><i class="fa fa-angle-right"></i> Map Reduce</a></li>
+                  <li><a href="pig"><i class="fa fa-angle-right"></i> Pig</a></li>
                 </ul>
               </li>
             </ul>

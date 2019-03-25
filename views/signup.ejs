@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<% include includes/headersignin.ejs %>	
+	<!-- main -->
+	<div class="main">
+		<h1>Hadoop as a Service</h1>
+		<div class="main-w3lsrow">
+			<!-- login form -->
+			<div class="login-form login-form-left"> 
+				<div class="agile-row">
+					<div class="head">
+						<h2>Sign Up</h2>
+						<span class="fa fa-lock"></span>
+					</div>					
+					<div class="clear"></div>
+					<div class="login-agileits-top">
+						<% include ./partials/messages %> 	
+						<form action="signup" method="post">
+							<input type="text" class="name" name="name" Placeholder="Username" value="<%= typeof name != 'undefined' ? name : '' %>" required=""/>
+							<input type="text" class="name" name="email" Placeholder="email" value="<%= typeof email != 'undefined' ? email : '' %>" required=""/>
+							<input type="password" class="password" name="password" Placeholder="Password" value="<%= typeof password != 'undefined' ? password : '' %>" required=""/>
+							<input type="password" class="password" name="password2" Placeholder="Confirm Password" value="<%= typeof password2 != 'undefined' ? password2 : '' %>" required=""/>
+							<input type="submit" value="Login Now"> 
+						</form> 	
+					</div> 
+					<div class="login-agileits-bottom"> 
+						<h6><a href="signin">Already have an account ?</a></h6>
+					</div> 
+				</div>  
+			</div>  
+		</div>
+<% include includes/footersignin.ejs %>			
