@@ -55,6 +55,8 @@ function run_job(token,job_id){
   });
 }
 
+//step5: Get Cluster ID
+
 //step4: creating job template
 function create_job_template(token,lib_id){
 
