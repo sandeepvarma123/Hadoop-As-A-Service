@@ -13,10 +13,34 @@ router.get('/index', ensureAuthenticated, (req,res) => {
     })
 });
 
-router.get('/jobHistory', ensureAuthenticated, (req,res) => res.render('jobHistory'));
+router.get('/jobHistory', ensureAuthenticated, (req,res) => {
+    //console.log(req.user);
+    res.render('jobHistory', {
+        name: req.user.name,
+        isAdmin : req.user.isadmin
+    })
+});
 
-router.get('/java', ensureAuthenticated , (req,res) => res.render('java'));
-router.get('/pig', ensureAuthenticated ,(req,res) => res.render('pig'));
-router.get('/mapReduce', ensureAuthenticated ,(req,res) => res.render('mapReduce'));
+router.get('/java', ensureAuthenticated , (req,res) => {
+    //console.log(req.user);
+    res.render('java', {
+        name: req.user.name,
+        isAdmin : req.user.isadmin
+    })
+});
+router.get('/pig', ensureAuthenticated ,(req,res) => {
+    //console.log(req.user);
+    res.render('pig', {
+        name: req.user.name,
+        isAdmin : req.user.isadmin
+    })
+});
+router.get('/mapReduce', ensureAuthenticated ,(req,res) => {
+    //console.log(req.user);
+    res.render('mapReduce', {
+        name: req.user.name,
+        isAdmin : req.user.isadmin
+    })
+});
 
 module.exports = router;
