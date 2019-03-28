@@ -14,7 +14,7 @@ var Storage = multer.diskStorage({
 });
 
 
-var upload = multer({ storage: Storage }).array("imgUploader", 2); //Field name and max count 
+var upload = multer({ storage: Storage }).array("imgUploader", 2); //Field name and max count ...
 
 router.get("/Upload", (req, res) =>  {
     
