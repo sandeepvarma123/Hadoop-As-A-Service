@@ -1,9 +1,10 @@
-var request = require('request');
+const request = require('request');
 const fs = require('fs');
+const path = require('path');
 
 
 var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
-    
+   
   var Interval;
   var previousStatus = "";
   
@@ -39,7 +40,7 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
   }
   
   //step6: run the job
-  function run_job(token,job_id){
+  function run_job(token,job_id,hadoop_cluster_id){
     console.log("Attempting to run the Job");
     request.post({
       url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/jobs/'+job_id+'/execute',
@@ -48,7 +49,7 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
         'X-Auth-Token' : token
       },
       body: JSON.stringify({
-        "cluster_id": "c0ddacb0-c2a7-4e30-9db7-022fb8027deb",
+        "cluster_id": hadoop_cluster_id,
         "job_configs": {
             "configs": {
                 "edp.java.main_class" : "org.openstack.sahara.examples.WordCount",
@@ -78,6 +79,31 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
   }
   
   //step5: Get Cluster ID
+  function get_cluster_id(token,job_id){
+
+    request.get({
+        url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/clusters',
+        headers: {
+            'Content-Type':'application/json',
+            'X-Auth-Token' : token
+          }
+    },(err,response,body)=>{
+        if(err){
+            console.log(err);
+          }
+          var res = JSON.parse(body);
+          var hadoop_cluster_id;
+          for(var cluster of res.clusters){
+              if(cluster.name == "hadoop"){
+                  hadoop_cluster_id = cluster.verification.cluster_id;
+                  break;
+              }
+          }
+
+          run_job(token,job_id,hadoop_cluster_id);
+          
+    })
+}
   
   //step4: creating job template
   function create_job_template(token,lib_id){
@@ -89,12 +115,11 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
         'X-Auth-Token' : token
       },
       body: JSON.stringify({
-        "description": "Demo Job  Created By APIs",
         "libs": [
            lib_id
         ],
         "type": "Java",
-        "name": "Hadoop1-Example"
+        "name": path.parse(jarFileName).name
     })
     },(err,response,body)=>{
       if(err){
@@ -103,7 +128,7 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
       var res = JSON.parse(body);
       //console.log(res.job.id);
       console.log("Job Template Created Successfully");
-      run_job(token,res.job.id);
+      get_cluster_id(token,res.job.id);
   
     });
   }
@@ -119,8 +144,8 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
         'X-Auth-Token' : token
       },
       body:  JSON.stringify({
-        "url": "swift://scripts/hadoop1.jar",
-        "name": "hadoop1.jar",
+        "url": "swift://scripts/"+jarFileName,
+        "name": jarFileName,
         "extra": {
           "password": "ghost0197",
           "user": "admin"
@@ -139,11 +164,11 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
   
   
   //step2: upload script file to swift
-  function swift_container_upload(token){
+  function swift_container_script_upload(token){
     console.log("Uploading Script Files");
     //upload to swift container
-    fs.createReadStream('hadoop.jar').pipe(request.put({
-        url: 'http://172.16.2.140:8080/v1/AUTH_109d5a0fef34423582747e609b8c6c0f/scripts/hadoop1.jar',
+    fs.createReadStream('public/uploads/'+jarFileName).pipe(request.put({
+        url: 'http://172.16.2.140:8080/v1/AUTH_109d5a0fef34423582747e609b8c6c0f/scripts/'+jarFileName,
         json: true,
         headers: {
           'Content-Type':'application/json',
@@ -154,9 +179,30 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
           if(err){
             console.log(err);
           }
-          //console.log(response.statusMessage);
-          console.log("Files uploaded successfully");
+          console.log("Script Files uploaded successfully");
           create_job_binary(token)
+      })
+    ) 
+  }
+
+  //step2: upload input file to swift
+  function swift_container_input_upload(token){
+    console.log("Uploading Input Files");
+    //upload to swift container
+    fs.createReadStream('public/uploads/'+txtFileName).pipe(request.put({
+        url: 'http://172.16.2.140:8080/v1/AUTH_109d5a0fef34423582747e609b8c6c0f/hadoop/input',
+        json: true,
+        headers: {
+          'Content-Type':'application/json',
+          'X-Auth-Token' : token
+        }
+      },(err,response,body)=>{
+          
+          if(err){
+            console.log(err);
+          }
+          console.log("Input Files uploaded successfully");
+          swift_container_script_upload(token);
       })
     ) 
   }
@@ -195,7 +241,7 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
            }
            var token =  response.headers['x-subject-token'];
            console.log("Credentails Verified. User Authenticated");
-           swift_container_upload(token);
+           swift_container_input_upload(token);
         }
   );
   
