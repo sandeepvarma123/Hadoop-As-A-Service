@@ -3,12 +3,12 @@ const fs = require('fs');
 const path = require('path');
 
 
-var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
+var execute_mapReduce_job = (mapperClass,reducerClass,txtFileName,jarFileName)=>{
    
   var Interval;
   var previousStatus = "";
   
-  //step7: get job status
+  //step8: get job status
   //till info.lastModTime
   function get_job_status(token,job_execution_id){
     request.get({
@@ -35,22 +35,12 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
   
         clearInterval(Interval);
         console.log("Job Execution completed");
-        console.log("Uploading job history to database");
-         var java_history = new History({});
-         java_history.save((err)=>{
-            if(err){
-              console.log(err);
-            }
-            else{
-              console.log("Uploaded job history to database..Success");
-            }
-         });
       }
     });
   }
   
-  //step6: run the job
-  function run_job(token,job_id,hadoop_cluster_id){
+  //step7: run the job
+  function run_job(token,job_id,hadoop_cluster_id,input_ds_id,output_ds_id){
     console.log("Attempting to run the Job");
     request.post({
       url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/jobs/'+job_id+'/execute',
@@ -60,13 +50,14 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
       },
       body: JSON.stringify({
         "cluster_id": hadoop_cluster_id,
+        "input_id": input_ds_id,
+        "output_id":output_ds_id,
         "job_configs": {
             "configs": {
-                "edp.java.main_class" : "org.openstack.sahara.examples.WordCount",
-                "fs.swift.service.sahara.username":"admin",
-                "fs.swift.service.sahara.password":"ghost0197",
-                "edp.java.adapt_for_oozie":"True",
-                "edp.hbase_common_lib":"True",
+                "mapred.reducer.new-api" : "true",
+                "mapred.mapper.new-api":"true",
+                "mapreduce.job.map.class":mapperClass,
+                "mapreduce.job.reduce.class":reducerClass, 
                 "edp.substitute_data_source_for_name":"True",
                 "edp.substitute_data_source_for_uuid":"True"
             },
@@ -87,6 +78,37 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
       Interval = setInterval(function(){get_job_status(token,res.job_execution.id);},3000);
     });
   }
+
+  //step6: get data sources id
+  function get_sources_id(token,job_id,hadoop_cluster_id){
+    request.get({
+        url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/data-sources',
+        headers: {
+            'Content-Type':'application/json',
+            'X-Auth-Token' : token
+          }
+    
+    },(err,response,body)=>{
+        if(err){
+            console.log(err);
+          }
+          var res = JSON.parse(body);
+          var input_ds_id,output_ds_id;
+          for( var data_source of res.data_sources ){
+              if(data_source.name == "input-ds"){
+                  input_ds_id = data_source.id;
+              }
+              if(data_source.name == "output-ds"){
+                  output_ds_id = data_source.id;
+            }
+          }
+          console.log(input_ds_id);
+          console.log(output_ds_id);
+
+          run_job(token,job_id,hadoop_cluster_id,input_ds_id,output_ds_id);
+    
+    });
+}
   
   //step5: Get Cluster ID
   function get_cluster_id(token,job_id){
@@ -110,7 +132,7 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
               }
           }
 
-          run_job(token,job_id,hadoop_cluster_id);
+          get_sources_id(token,job_id,hadoop_cluster_id);
           
     })
 }
@@ -128,7 +150,7 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
         "libs": [
            lib_id
         ],
-        "type": "Java",
+        "type": "MapReduce",
         "name": path.parse(jarFileName).name
     })
     },(err,response,body)=>{
@@ -257,4 +279,4 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
   
 }
 
-module.exports.execute_java_job = execute_java_job;
+module.exports.execute_mapReduce_job = execute_mapReduce_job;

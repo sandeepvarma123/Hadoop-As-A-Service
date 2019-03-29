@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer'); 
 const javaJob= require('./jobs/java_execution');
+const mapReduceJob= require('./jobs/mapReduce_execution');
 const { ensureAuthenticated } = require('../config/auth');
 
 //Welcome page
@@ -30,9 +31,6 @@ router.get('/java', ensureAuthenticated , (req,res) => {
         isAdmin : req.user.isadmin
     })
 });
-
- 
-
 
 router.post('/java',ensureAuthenticated,(req,res) => {
 
@@ -68,9 +66,6 @@ router.post('/java',ensureAuthenticated,(req,res) => {
             return res.end("Files uploaded sucessfully!.");
     }); 
 
-
-    
-
 });
 
 router.get('/pig', ensureAuthenticated ,(req,res) => {
@@ -86,6 +81,43 @@ router.get('/mapReduce', ensureAuthenticated ,(req,res) => {
         name: req.user.name,
         isAdmin : req.user.isadmin
     })
+});
+
+router.post('/mapReduce',ensureAuthenticated,(req,res) => {
+
+    var txtFileName;
+    var libFileName;
+    var mapperClassName;
+    var reducerClassName;
+
+    //uploading  files to public folder
+    var Storage = multer.diskStorage({
+        destination: function (req, file, callback) {
+            callback(null, "./public/uploads");
+        },
+        filename: function (req, file, callback) {
+            callback(null, file.originalname);
+        }
+    });
+
+    var upload = multer({ storage: Storage }).array("imgUploader", 2); //Field name and max count
+
+     upload(req, res, function (err) { 
+            if (err) { 
+                console.log(err); 
+            } 
+
+            console.log("Files Uploaded To Public Folder Successfuly");
+            txtFileName = res.req.files[0].filename;
+            libFileName = res.req.files[1].filename;
+            mapperClassName = req.body.mapperClass;
+            reducerClassName = req.body.reducerClass;
+            
+            mapReduceJob.execute_mapReduce_job(mapperClassName,reducerClassName,txtFileName,libFileName);
+
+            return res.end("Files uploaded sucessfully!.");
+    }); 
+
 });
 
 module.exports = router;
