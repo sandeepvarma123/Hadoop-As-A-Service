@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer'); 
 const javaJob= require('./jobs/java_execution');
 const mapReduceJob= require('./jobs/mapReduce_execution');
+const pigJob= require('./jobs/pig_execution');
 const { ensureAuthenticated } = require('../config/auth');
 
 //Welcome page
@@ -16,8 +17,18 @@ router.get('/index', ensureAuthenticated, (req,res) => {
     })
 });
 
+//admin page
+router.get('/AdminPage', ensureAuthenticated, (req,res) => {
+    //console.log(req.user);
+    res.render('AdminPage', {
+        name: req.user.name,
+        isAdmin : req.user.isadmin
+    })
+});
+
 router.get('/jobHistory', ensureAuthenticated, (req,res) => {
     //console.log(req.user);
+    
     res.render('jobHistory', {
         name: req.user.name,
         isAdmin : req.user.isadmin
@@ -37,6 +48,7 @@ router.post('/java',ensureAuthenticated,(req,res) => {
     var txtFileName;
     var jarFileName;
     var mainClassName;
+    var email;
 
     //uploading  files to public folder
     var Storage = multer.diskStorage({
@@ -59,9 +71,9 @@ router.post('/java',ensureAuthenticated,(req,res) => {
             txtFileName = res.req.files[0].filename;
             jarFileName = res.req.files[1].filename;
             mainClassName = req.body.mainClass;
-            console.log(mainClassName);
+            email = req.user.email;
             
-            javaJob.execute_java_job(mainClassName,txtFileName,jarFileName);
+            javaJob.execute_java_job(mainClassName,txtFileName,jarFileName,email);
 
             return res.end("Files uploaded sucessfully!.");
     }); 
@@ -75,6 +87,45 @@ router.get('/pig', ensureAuthenticated ,(req,res) => {
         isAdmin : req.user.isadmin
     })
 });
+
+router.post('/pig',ensureAuthenticated,(req,res) => {
+
+    var txtFileName;
+    var mainLibFileName;
+    var libFileName;
+    var email;
+
+    //uploading  files to public folder
+    var Storage = multer.diskStorage({
+        destination: function (req, file, callback) {
+            callback(null, "./public/uploads");
+        },
+        filename: function (req, file, callback) {
+            callback(null, file.originalname);
+        }
+    });
+
+    var upload = multer({ storage: Storage }).array("imgUploader", 3); //Field name and max count
+
+     upload(req, res, function (err) { 
+            if (err) { 
+                console.log(err); 
+            } 
+
+            console.log("Files Uploaded To Public Folder Successfuly");
+            console.log(res.req.files);
+            txtFileName = res.req.files[0].filename;
+            mainLibFileName = res.req.files[1].filename;
+            libFileName = res.req.files[2].filename;
+            email = req.user.email;
+            
+            pigJob.execute_pig_job(txtFileName,mainLibFileName,libFileName,email);
+
+            return res.end("Files uploaded sucessfully!.");
+    }); 
+
+});
+
 router.get('/mapReduce', ensureAuthenticated ,(req,res) => {
     //console.log(req.user);
     res.render('mapReduce', {
@@ -89,6 +140,7 @@ router.post('/mapReduce',ensureAuthenticated,(req,res) => {
     var libFileName;
     var mapperClassName;
     var reducerClassName;
+    var email;
 
     //uploading  files to public folder
     var Storage = multer.diskStorage({
@@ -112,8 +164,9 @@ router.post('/mapReduce',ensureAuthenticated,(req,res) => {
             libFileName = res.req.files[1].filename;
             mapperClassName = req.body.mapperClass;
             reducerClassName = req.body.reducerClass;
+            email = req.user.email;
             
-            mapReduceJob.execute_mapReduce_job(mapperClassName,reducerClassName,txtFileName,libFileName);
+            mapReduceJob.execute_mapReduce_job(mapperClassName,reducerClassName,txtFileName,libFileName,email);
 
             return res.end("Files uploaded sucessfully!.");
     }); 

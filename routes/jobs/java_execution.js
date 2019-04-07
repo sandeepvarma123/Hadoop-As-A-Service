@@ -1,9 +1,9 @@
 const request = require('request');
 const fs = require('fs');
 const path = require('path');
+const History = require('../../models/History');
 
-
-var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
+var execute_java_job = (mainClassName,txtFileName,jarFileName,email)=>{
    
   var Interval;
   var previousStatus = "";
@@ -36,7 +36,7 @@ var execute_java_job = (mainClassName,txtFileName,jarFileName)=>{
         clearInterval(Interval);
         console.log("Job Execution completed");
         console.log("Uploading job history to database");
-         var java_history = new History({});
+        var java_history = new History({email:email,type:'Java',jobName:path.parse(jarFileName).name,jobStatus:res.job_execution.info.status});
          java_history.save((err)=>{
             if(err){
               console.log(err);

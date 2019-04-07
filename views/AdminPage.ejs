@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+		<% include includes/header.ejs %>
+		<% include includes/sideNavBar.ejs %>	
+		<% include includes/headNavBar.ejs %>
+		<!-- main content start-->
+		<div id="page-wrapper">
+				<div class="main-page">
+					<div class="tables">
+						<h2 class="title1">Admin Panel</h2>
+									<div class="bs-example widget-shadow" data-example-id="contextual-table"> 
+											<h2 style="margin:5px">Account Activation</h2>
+											<p style="margin:5px">Type something in the input field to search the table for first names, last names or emails:</p>  
+											<input style="margin:5px" class="form-control" id="myInput" type="text" placeholder="Search..">
+											<br>
+											<table style="margin:5px" class="table table-bordered table-striped">
+													<thead>
+													<tr>
+														<th>Name</th>
+														<th>Email</th>
+														<th>Action</th>
+													</tr>
+													</thead>
+													<tbody id="myTable">
+													<tr>
+														<td>sanndeep</td>
+														<td>sandeep@gmail.com</td>
+														<td><form action="/activate"><button type="submit" name="" class="btn btn-success" >Activate Account</button></form></td>
+													</tr>
+													<tr>
+														<td>sandeep1</td>
+														<td>sandeep1@gmail.com</td>
+														<td><form action="/activate"><button type="submit" class="btn btn-success" >Activate Account</button></form></td>
+													</tr>
+													</tbody>
+											</table>
+									</div>
+					</div>
+				</div>
+		</div>
+						<div class="clearfix"> </div>
+					</div>	
+				</div>
+			</div>
+<% include includes/footer.ejs %>		

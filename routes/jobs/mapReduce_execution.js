@@ -1,9 +1,9 @@
 const request = require('request');
 const fs = require('fs');
 const path = require('path');
+const History = require('../../models/History');
 
-
-var execute_mapReduce_job = (mapperClass,reducerClass,txtFileName,jarFileName)=>{
+var execute_mapReduce_job = (mapperClass,reducerClass,txtFileName,jarFileName,email)=>{
    
   var Interval;
   var previousStatus = "";
@@ -35,6 +35,16 @@ var execute_mapReduce_job = (mapperClass,reducerClass,txtFileName,jarFileName)=>
   
         clearInterval(Interval);
         console.log("Job Execution completed");
+        console.log("Uploading job history to database");
+        var java_history = new History({email:email,type:'MapReduce',jobName:path.parse(jarFileName).name,jobStatus:res.job_execution.info.status});
+         java_history.save((err)=>{
+            if(err){
+              console.log(err);
+            }
+            else{
+              console.log("Uploaded job history to database..Success");
+            }
+         });
       }
     });
   }
@@ -60,11 +70,7 @@ var execute_mapReduce_job = (mapperClass,reducerClass,txtFileName,jarFileName)=>
                 "mapreduce.job.reduce.class":reducerClass, 
                 "edp.substitute_data_source_for_name":"True",
                 "edp.substitute_data_source_for_uuid":"True"
-            },
-            "args": [
-                "input-ds",
-                "output-ds"
-            ]
+            }
         }
     })
     },(err,response,body)=>{
@@ -102,8 +108,8 @@ var execute_mapReduce_job = (mapperClass,reducerClass,txtFileName,jarFileName)=>
                   output_ds_id = data_source.id;
             }
           }
-          console.log(input_ds_id);
-          console.log(output_ds_id);
+          //console.log(input_ds_id);
+          //console.log(output_ds_id);
 
           run_job(token,job_id,hadoop_cluster_id,input_ds_id,output_ds_id);
     

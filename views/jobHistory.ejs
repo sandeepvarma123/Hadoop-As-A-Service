@@ -7,33 +7,39 @@
 		<div id="page-wrapper">
 			<div class="main-page">
 				<div class="tables">
-					<h2 class="title1">Tables</h2>
+					<h2 class="title1">User Job History</h2>
 								<div class="bs-example widget-shadow" data-example-id="contextual-table"> 
-									<h4>Colored Rows Table:</h4>
-									<table class="table">
-										<thead> 
-											<tr>
-												<th>#</th>
-												<th>Column heading</th> 
-												<th>Column heading</th> 
-												<th>Column heading</th> 
-											</tr> 
-										</thead>
-										<tbody> 
-											<tr> 
-												<th scope="row">2</th> 
-												<td>Column content</td> 
-												<td>Column content</td> 
-												<td>Column content</td> 
-											</tr> 
-											<tr class="danger"> 
-												<th scope="row">9</th> 
-												<td>Column content</td> 
-												<td>Column content</td> 
-												<td>Column content</td> 
-											</tr> 
-										</tbody>
-									</table> 
+										<h2 style="margin:5px">Job Execution History</h2>
+										<p style="margin:5px">Type something in the input field to search the table for first names, last names or emails:</p>  
+										<input style="margin:5px" class="form-control" id="myInput" type="text" placeholder="Search..">
+										<br>
+									<table class="table table-bordered table-striped">
+											<thead>
+											  <tr>
+												<th>Email</th>
+												<th>Type</th>
+												<th>JobName</th>
+												<th>Job Staus</th>
+												<th>Date</th>
+											  </tr>
+											</thead>
+											<tbody id="myTable">
+											  <tr>
+												<td>sandeep@gmail.com</td>
+												<td>Java</td>
+												<td>edp-java</td>
+												<td>Killed</td>
+												<td>07-04-2019T10:10:22.950+00:00</td>
+											  </tr>
+											  <tr>
+												<td>sandeep@gmail.com</td>
+												<td>Pig</td>
+												<td>map-reduce</td>
+												<td>Killed</td>
+												<td>07-04-2019T10:10:22.950+00:00</td>
+											  </tr>
+											</tbody>
+										  </table>
 								</div>
 							</div>
 						</div>
@@ -43,3 +49,4 @@
 			</div>
 		</div>
 <% include includes/footer.ejs %>	
+

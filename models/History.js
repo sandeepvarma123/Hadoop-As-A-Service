@@ -14,6 +14,10 @@ const HistorySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    jobStatus: {
+        type: String,
+        required: true
+    },
     date: {
         type: Date,
         default: Date.now
