@@ -10,7 +10,7 @@
 						<h2 class="title1">Admin Panel</h2>
 									<div class="bs-example widget-shadow" data-example-id="contextual-table"> 
 											<h2 style="margin:5px">Account Activation</h2>
-											<p style="margin:5px">Type something in the input field to search the table for first names, last names or emails:</p>  
+											<p style="margin:5px">Type something in the input field to search the table for names or emails:</p>  
 											<input style="margin:5px" class="form-control" id="myInput" type="text" placeholder="Search..">
 											<br>
 											<table style="margin:5px" class="table table-bordered table-striped">
@@ -22,16 +22,27 @@
 													</tr>
 													</thead>
 													<tbody id="myTable">
-													<tr>
-														<td>sanndeep</td>
-														<td>sandeep@gmail.com</td>
-														<td><form action="/activate"><button type="submit" name="" class="btn btn-success" >Activate Account</button></form></td>
-													</tr>
-													<tr>
-														<td>sandeep1</td>
-														<td>sandeep1@gmail.com</td>
-														<td><form action="/activate"><button type="submit" class="btn btn-success" >Activate Account</button></form></td>
-													</tr>
+															<% if (!data.length) { %>
+																<script>
+																	 alert("No Users Found");         
+																</script>
+													 <% } %>
+
+													 <% for(var i=0; i < data.length; i++) { 
+														 if(data[i].email == "admin@gmail.com") continue; %>
+														<tr>
+																<td><%= data[i].name %></td>
+																<td><%= data[i].email %></td>
+																
+																<% if(data[i].isauthenticated == false){ %>
+																<td><form action="/activate" method="post" ><input type="hidden" name="email" value=<%=data[i].email %> /> <button type="submit"  class="btn btn-success" >Activate Account</button></form></td>
+																<% } %>
+																<% if(data[i].isauthenticated == true ){ %>
+																<td><form action="/deactivate"  method="post"><input type="hidden" name="email" value=<%=data[i].email %> /><button type="submit"  class="btn btn-danger" >Deactivate Account</button></form></td>
+																<% } %>
+															</tr>
+													 <% } %>
+													
 													</tbody>
 											</table>
 									</div>

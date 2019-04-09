@@ -1,3 +1,4 @@
+
 <!DOCTYPE HTML>
 <html>
 		<% include includes/header.ejs %>
@@ -24,20 +25,22 @@
 											  </tr>
 											</thead>
 											<tbody id="myTable">
-											  <tr>
-												<td>sandeep@gmail.com</td>
-												<td>Java</td>
-												<td>edp-java</td>
-												<td>Killed</td>
-												<td>07-04-2019T10:10:22.950+00:00</td>
-											  </tr>
-											  <tr>
-												<td>sandeep@gmail.com</td>
-												<td>Pig</td>
-												<td>map-reduce</td>
-												<td>Killed</td>
-												<td>07-04-2019T10:10:22.950+00:00</td>
-											  </tr>
+													<% if (!data.length) { %>
+														<script>
+															 alert("No Data Found");         
+														</script>
+											 <% } %>
+												 
+													<% for(var i=0; i < data.length; i++) { %>
+														<tr>
+																<td><%= data[i].email %></td>
+																<td><%= data[i].type %></td>
+																<td><%= data[i].jobName %></td>
+																<td><%= data[i].jobStatus %></td>
+																<td><%= data[i].date %></td>
+															</tr>
+													 <% } %>
+											  
 											</tbody>
 										  </table>
 								</div>

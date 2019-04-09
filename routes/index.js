@@ -6,6 +6,10 @@ const mapReduceJob= require('./jobs/mapReduce_execution');
 const pigJob= require('./jobs/pig_execution');
 const { ensureAuthenticated } = require('../config/auth');
 
+const History = require('../models/History');
+const User = require('../models/User');
+
+
 //Welcome page
 router.get('/', (req,res) => res.render('signin'));
 //Dashboard page
@@ -17,22 +21,28 @@ router.get('/index', ensureAuthenticated, (req,res) => {
     })
 });
 
-//admin page
-router.get('/AdminPage', ensureAuthenticated, (req,res) => {
-    //console.log(req.user);
-    res.render('AdminPage', {
-        name: req.user.name,
-        isAdmin : req.user.isadmin
-    })
-});
+
 
 router.get('/jobHistory', ensureAuthenticated, (req,res) => {
     //console.log(req.user);
     
-    res.render('jobHistory', {
+   History.find({email: req.user.email},function (err, data) {
+
+    if(err)
+    {
+        console.log(err);
+    }
+       console.log(data);
+      // console.log(data[0]);
+       res.render('jobHistory', {        
         name: req.user.name,
-        isAdmin : req.user.isadmin
-    })
+        isAdmin : req.user.isadmin,
+        data 
+        })  
+   });
+   
+   
+   
 });
 
 router.get('/java', ensureAuthenticated , (req,res) => {
