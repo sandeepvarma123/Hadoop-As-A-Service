@@ -136,6 +136,14 @@ router.post('/pig',ensureAuthenticated,(req,res) => {
 
 });
 
+router.get('/spark', ensureAuthenticated ,(req,res) => {
+    //console.log(req.user);
+    res.render('spark', {
+        name: req.user.name,
+        isAdmin : req.user.isadmin
+    })
+});
+
 router.get('/mapReduce', ensureAuthenticated ,(req,res) => {
     //console.log(req.user);
     res.render('mapReduce', {
