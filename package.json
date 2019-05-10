@@ -22,19 +22,25 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "child_process": "^1.0.2",
     "connect-flash": "^0.1.1",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
+    "express-zip": "^2.0.1",
     "fs": "0.0.1-security",
+    "merge-files": "^0.1.1",
     "mongoose": "^5.4.19",
     "multer": "^1.4.1",
     "multipart": "^0.1.5",
     "multipart-formdata": "^1.1.0",
+    "node-dir": "^0.1.17",
+    "node-run-cmd": "^1.0.1",
     "parse-multipart": "^1.0.4",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "zip-folder": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"

@@ -3,9 +3,17 @@ const fs = require('fs');
 const path = require('path');
 const History = require('../../models/History');
 
+//API ENDPOINTS
+const keystone_url = require('../../config/api_endpoints').keystone;
+const sahara_url   = require('../../config/api_endpoints').sahara;
+const swift_url    = require('../../config/api_endpoints').swift;
+
+//CLUSTER NAMES
+const hadoop = require('../../config/cluster_names').hadoop;
+const spark  = require('../../config/cluster_names').spark;
 
 
-var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
+var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email,res1)=>{
    
   var Interval;
   var previousStatus = "";
@@ -14,7 +22,7 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //till info.lastModTime
   function get_job_status(token,job_execution_id){
     request.get({
-      url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/job-executions/'+job_execution_id,
+      url:sahara_url+'/job-executions/'+job_execution_id,
       headers: {
         'Content-Type':'application/json',
         'X-Auth-Token' : token
@@ -22,11 +30,13 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
     },function(err,response,body){
       if(err){
         console.log(err);
+        return res1.end(err);
       }
       var res = JSON.parse(body);
       var currStatus = res.job_execution.info.status;
       if(previousStatus.toString() != currStatus.toString()){
         console.log("Job Status: "+ currStatus);
+        res1.write("Job Status: "+ currStatus+"<br>");
       }
       previousStatus = currStatus;
       /*
@@ -37,14 +47,20 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   
         clearInterval(Interval);
         console.log("Job Execution completed");
+        res1.write("Job Execution completed<br>");
         console.log("Uploading job history to database");
+        res1.write("Uploading job history to database<br>");
+      
         var java_history = new History({email:email,type:'Pig',jobName:path.parse(libFileName).name,jobStatus:res.job_execution.info.status});
          java_history.save((err)=>{
             if(err){
               console.log(err);
+              return res1.end(err);
             }
             else{
               console.log("Uploaded job history to database..Success");
+              res1.write('<a href="/download">Download Your Files Here</a>');
+              res1.write("Uploaded job history to database..Success<br>");
             }
          });
 
@@ -56,8 +72,9 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //step10: run the job
   function run_job(token,job_id,hadoop_cluster_id,input_ds_id,output_ds_id){
     console.log("Attempting to run the Job");
+    res1.write("Attempting to run the job<br>");
     request.post({
-      url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/jobs/'+job_id+'/execute',
+      url:sahara_url+'/jobs/'+job_id+'/execute',
       headers: {
         'Content-Type':'application/json',
         'X-Auth-Token' : token
@@ -76,11 +93,14 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
     },(err,response,body)=>{
       if(err){
         console.log(err);
+        return res1.end(err);
       }
       var res = JSON.parse(body);
       //console.log(res.job_execution.id);
       console.log("Starting the Job");
+      res1.write("Starting the Job<br>");
       console.log("Retrieving the Job Status");
+      res1.write("Retrieving Job Status<br>");
       Interval = setInterval(function(){get_job_status(token,res.job_execution.id);},3000);
     });
   }
@@ -88,7 +108,7 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //step9: get data sources id
   function get_sources_id(token,job_id,hadoop_cluster_id){
     request.get({
-        url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/data-sources',
+        url:sahara_url+'/data-sources',
         headers: {
             'Content-Type':'application/json',
             'X-Auth-Token' : token
@@ -97,6 +117,7 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
     },(err,response,body)=>{
         if(err){
             console.log(err);
+            return res1.end(err);
           }
           var res = JSON.parse(body);
           var input_ds_id,output_ds_id;
@@ -120,7 +141,7 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   function get_cluster_id(token,job_id){
 
     request.get({
-        url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/clusters',
+        url:sahara_url+'/clusters',
         headers: {
             'Content-Type':'application/json',
             'X-Auth-Token' : token
@@ -128,11 +149,12 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
     },(err,response,body)=>{
         if(err){
             console.log(err);
+            return res1.end(err);
           }
           var res = JSON.parse(body);
           var hadoop_cluster_id;
           for(var cluster of res.clusters){
-              if(cluster.name == "hadoop"){
+              if(cluster.name == hadoop){
                   hadoop_cluster_id = cluster.verification.cluster_id;
                   break;
               }
@@ -146,8 +168,9 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //step7: creating job template
   function create_job_template(token,main_lib_id,lib_id){
     console.log("Creating Job Template");
+    res1.write("Creating Job Template<br>");
     request.post({
-      url:'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/jobs',
+      url:sahara_url+'/jobs',
       headers: {
         'Content-Type':'application/json',
         'X-Auth-Token' : token
@@ -165,10 +188,12 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
     },(err,response,body)=>{
       if(err){
         console.log(err);
+        return res1.end(err);
       }
       var res = JSON.parse(body);
       //console.log(res.job.id);
       console.log("Job Template Created Successfully");
+      res1.write("Job Template Created Successfully<br>");
       get_cluster_id(token,res.job.id);
   
     });
@@ -176,9 +201,10 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
 //step6: job binary for Library files
   function create_job_binary1(token,mainLibId){
     console.log("Creating Job Binaries for  Library file");
+    res1.write("Creating Job Binaries for  Library file<br>");
     //create job binary
     request.post({
-      url: 'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/job-binaries',
+      url: sahara_url+'/job-binaries',
       headers: {
         'Content-Type':'application/json',
         'X-Auth-Token' : token
@@ -194,11 +220,14 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
     },(err,response,body)=>{
          if(err){
            console.log(err);
+           return res1.end(err);
          }
          var res = JSON.parse(body);
          //console.log(res.job_binary.id);
          console.log("Job Binaries created successfully for  Library file");
-         create_job_template(token,mainLibId,res.job_binary.id);      
+         res1.write("Job Binaries created successfully for  Library file<br>");
+         create_job_template(token,mainLibId,res.job_binary.id);
+            
     });
   }
   
@@ -206,9 +235,10 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //step5: creating job binary for Main Library File
   function create_job_binary(token){
     console.log("Creating Job Binaries for Main Library");
+    res1.write("Creating Job Binaries for Main Library<br>");
     //create job binary
     request.post({
-      url: 'http://172.16.2.140:8386/v1.1/109d5a0fef34423582747e609b8c6c0f/job-binaries',
+      url:  sahara_url+'/job-binaries',
       headers: {
         'Content-Type':'application/json',
         'X-Auth-Token' : token
@@ -224,10 +254,12 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
     },(err,response,body)=>{
          if(err){
            console.log(err);
+           return res1.end(err);
          }
          var res = JSON.parse(body);
          //console.log(res.job_binary.id);
          console.log("Job Binaries created successfully for Main Library");
+         res1.write("Job Binaries created successfully for Main Library<br>");
          create_job_binary1(token,res.job_binary.id);      
     });
   }
@@ -235,9 +267,10 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //step4: upload lib file to swift
   function swift_container_lib_upload(token){
     console.log("Uploading Library Files");
+    console.log("Uploading Library Files<br>");
     //upload to swift container
     fs.createReadStream('public/uploads/'+libFileName).pipe(request.put({
-        url: 'http://172.16.2.140:8080/v1/AUTH_109d5a0fef34423582747e609b8c6c0f/scripts/'+libFileName,
+        url: swift_url+'/scripts/'+libFileName,
         json: true,
         headers: {
           'Content-Type':'application/json',
@@ -247,8 +280,10 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
           
           if(err){
             console.log(err);
+            return res1.end(err);
           }
           console.log("Library Files uploaded successfully");
+          res1.write("Library Files uploaded successfully<br>");
           create_job_binary(token);
       })
     ) 
@@ -258,9 +293,10 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //step3: upload main lib file to swift
   function swift_container_main_lib_upload(token){
     console.log("Uploading Main Library Files");
+    res1.write("Uploading Main Library Files<br>");
     //upload to swift container
     fs.createReadStream('public/uploads/'+mainLibFileName).pipe(request.put({
-        url: 'http://172.16.2.140:8080/v1/AUTH_109d5a0fef34423582747e609b8c6c0f/scripts/'+mainLibFileName,
+        url: swift_url+'/scripts/'+mainLibFileName,
         json: true,
         headers: {
           'Content-Type':'application/json',
@@ -270,8 +306,10 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
           
           if(err){
             console.log(err);
+            return res1.end(err);
           }
           console.log("Main Library Files uploaded successfully");
+          res1.write("Main Library Files uploaded successfully<br>");
           swift_container_lib_upload(token);
       })
     ) 
@@ -280,9 +318,10 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
   //step2: upload input file to swift
   function swift_container_input_upload(token){
     console.log("Uploading Input Files");
+    res1.write("Uploading Input Files<br>");
     //upload to swift container
     fs.createReadStream('public/uploads/'+txtFileName).pipe(request.put({
-        url: 'http://172.16.2.140:8080/v1/AUTH_109d5a0fef34423582747e609b8c6c0f/hadoop/input',
+        url: swift_url+'/hadoop/input',
         json: true,
         headers: {
           'Content-Type':'application/json',
@@ -292,16 +331,19 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
           
           if(err){
             console.log(err);
+            return res1.end(err);
           }
           console.log("Input Files uploaded successfully");
+          res1.write("Input Files uploaded successfully<br>");
           swift_container_main_lib_upload(token);
       })
     ) 
   }
   
   //step1: keystone authentication
+  res1.write("Starting KeyStone Authentication Service<br>");
   request.post({
-      url: 'http://172.16.2.140/identity/v3/auth/tokens',
+      url: keystone_url+'/v3/auth/tokens',
       headers: {
         'Content-Type':'application/json'
       },
@@ -330,9 +372,11 @@ var execute_pig_job = (txtFileName,mainLibFileName,libFileName,email)=>{
           console.log("Verifying credentails");
            if(err){
              console.log(err);
+             return res1.end(err);
            }
            var token =  response.headers['x-subject-token'];
            console.log("Credentails Verified. User Authenticated");
+           res1.write("Credentails Verified. User Authenticated<br>");
            swift_container_input_upload(token);
         }
   );
